@@ -68,5 +68,6 @@ async def session(engine, create):
 
 
 @pytest.fixture
-def test_app():
-    return TestClient(app)
+def test_app(session):
+    with TestClient(app) as client:
+        yield client

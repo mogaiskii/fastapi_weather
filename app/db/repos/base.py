@@ -1,7 +1,7 @@
 import uuid
-from typing import List
+from typing import List, Any
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, insert, update, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
 
@@ -11,6 +11,7 @@ from db.repos.exceptions import RepoNotFound, RepoManyForOne
 
 class Repo:
     __model__ = DBModel
+    __sorted_by__ = None
 
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -28,6 +29,8 @@ class Repo:
             await self.session.flush([item])
         if commit:
             await self.session.commit()
+
+        await self.session.refresh(item)
         return item
 
     async def delete(self, id: uuid.UUID, *, commit: bool = False):
@@ -36,9 +39,29 @@ class Repo:
         if commit:
             await self.session.commit()
 
+    async def update(self, id: uuid.UUID, values: dict[str, Any], *, commit: bool = False) -> None:
+        stmt = update(self.__model__).where(self.__model__.id == id).values(**values)
+        await self.session.execute(stmt)
+        if commit:
+            await self.session.commit()
+
+    async def insert(self, values: List[dict[str, Any]], *, commit: bool = False) -> None:
+        stmt = insert(self.__model__).values(values)
+        await self.session.execute(stmt)
+        if commit:
+            await self.session.commit()
+
+    async def exists(self, item_id: uuid.UUID) -> bool:
+        stmt = select(exists().where(self.__model__.id == item_id))
+        result = await self.session.execute(stmt)
+        return result.scalar()
+
     @property
     def query(self) -> Select:
-        return select(self.__model__)
+        stmt = select(self.__model__)
+        if self.__sorted_by__ is not None:
+            stmt = stmt.order_by(self.__sorted_by__)
+        return stmt
 
     async def fetch_one(self, statement: Select) -> DBModel:
         statement = statement.limit(2)
