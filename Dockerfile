@@ -1,6 +1,6 @@
 FROM python:3.12
 
-WORKDIR /src
+WORKDIR /app
 
 RUN pip install poetry
 RUN poetry config virtualenvs.create false
@@ -11,7 +11,7 @@ COPY pyproject.toml .
 COPY ./alembic ./alembic
 COPY alembic.ini .
 COPY ./tasks ./tasks
-COPY ./src .
+COPY ./app .
 
 RUN poetry install --no-root
 
