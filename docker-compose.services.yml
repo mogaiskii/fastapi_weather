@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  base-db:
+    image: postgres:14.7-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - base-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: base_app
+      POSTGRES_USER: base_app
+      POSTGRES_PASSWORD: password
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U base_app" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  base-db-data:
+    driver: local
