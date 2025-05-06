@@ -2,12 +2,18 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    db_url: str = ''
-
     debug: bool = False
 
-    def get_db_url(self):
-        return self.db_url
+    version: str = ''
+    DEFAULT_LAT: float = "44.8125"
+    DEFAULT_LON: float = "20.4612"
+    DEFAULT_TZ: str = "Europe/Belgrade"
 
 
-settings = Settings()
+try:
+    with open(".version") as f:
+        version = f.read()
+except Exception:
+    version = 'NA'
+
+settings = Settings(version=version)

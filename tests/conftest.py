@@ -1,13 +1,11 @@
 import asyncio
+import json
 import sys
 
 import pytest
 from faker import Faker
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from starlette.testclient import TestClient
 
-from db.models.base import DBBase
-from settings import settings
 from main import app
 
 
@@ -31,43 +29,15 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
-def _database_url():
-    return settings.get_db_url()
-
-
-@pytest.fixture(scope="session")
-def engine():
-    engine = create_async_engine(
-        settings.get_db_url()
-    )
-    yield engine
-    engine.sync_engine.dispose()
-
-
-@pytest.fixture(scope="session")
-async def init_database(engine):
-    async with engine.begin() as conn:
-        await conn.run_sync(DBBase.metadata.create_all)
-    return DBBase.metadata.create_all
-
-
-@pytest.fixture()
-async def create(engine):
-    async with engine.begin() as conn:
-        await conn.run_sync(DBBase.metadata.create_all)
-    yield
-    async with engine.begin() as conn:
-        await conn.run_sync(DBBase.metadata.drop_all)
-
-
 @pytest.fixture
-async def session(engine, create):
-    async with AsyncSession(engine) as session:
-        yield session
-
-
-@pytest.fixture
-def test_app(session):
+def test_app():
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture
+def load_test_json_data():
+    def load_data(file_name):
+        with open("tests/data/" + file_name) as data_file:
+            return json.load(data_file)
+    return load_data

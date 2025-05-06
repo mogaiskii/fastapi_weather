@@ -12,6 +12,7 @@ COPY ./alembic ./alembic
 COPY alembic.ini .
 COPY ./tasks ./tasks
 COPY ./app .
+COPY .version .version
 
 RUN poetry install --no-root
 
