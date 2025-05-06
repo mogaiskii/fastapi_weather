@@ -2,8 +2,8 @@
 
 ## Env variables
 
-- `DB_URL` - url string for pg database
 - `DEBUG` [Optional] - debug mode. `False` by default
+- `DEFAULT_LAT`, `DEFAULT_LON`, `DEFAULT_TZ` [Optional] - data for the place you want to look up. Belgrade by default.
 
 ## Running
 
@@ -14,7 +14,7 @@
 ### Option (b) - not so easy one
 
 From root (here):
-- `DB_URL=<your db url> uvicorn main:app --reload --app-dir app`
+- `uvicorn main:app --reload --app-dir app`
 
 ### Prerequisites & development
 
@@ -22,5 +22,3 @@ From root (here):
   - https://python-poetry.org/docs/#installation
 - Install dependencies
   - `poetry install`
-- Update databse
-  - `DB_URL=<your db url> alembic upgrade head`
